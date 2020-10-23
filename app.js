@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
@@ -32,7 +33,14 @@ const globalErrorHandler = require("./helpers/dbErrorHandler");
 
 const app = express();
 
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
 //GLOBAL Middlewares
+
+// Serving static files
+app.use(express.static(path.join(__dirname, "public")));
+
 //Set Security HTTP headers
 app.use(helmet());
 
@@ -82,9 +90,6 @@ app.use(
 	})
 );
 
-//Serving static files
-
-app.use(express.static(`${__dirname}/public`));
 /*app.use(cookieParser());
 app.use(expressValidator());*/
 app.use(cors());
@@ -97,15 +102,24 @@ app.use((req, res, next) => {
 	next();
 });
 
-//Routes
+// 3) Routes
+
+app.get("/", (req, res) => {
+	res.status(200).render("base", {
+		tour: "The firest Hiker",
+		user: "Francisco",
+	});
+});
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/review", reviewRoutes);
+app.use("/api/v1/reviews", reviewRoutes);
 app.use(globalErrorHandler);
 
 app.all("*", (req, res, next) => {
 	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+app.use(globalErrorHandler);
 
 module.exports = app;
