@@ -1,81 +1,78 @@
 const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
-const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
-const mongoSanitaze = require("express-mongo-sanitize");
+const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const compression = require("compression");
+const cors = require("cors");
 
 const AppError = require("./helpers/appError");
-
-//Routes
-
-const userRouter = require("./routes/userRoutes");
+const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
-const reviewRoutes = require("./routes/reviewRoutes");
-const viewRoutes = require("./routes/viewRoutes");
+const userRouter = require("./routes/userRoutes");
+const reviewRouter = require("./routes/reviewRoutes");
+//const bookingRouter = require("./routes/bookingRoutes");
+//const bookingController = require("./controllers/bookingController");
+const viewRouter = require("./routes/viewRoutes");
 
-//Body parser nos sirve para manejar todo el cuerpo de la request y la respuesta y como se
-//van a devolver esos datos
-
-dotenv.config({
-	path: "./.env",
-});
-
-
-const cors = require("cors");
-const globalErrorHandler = require("./helpers/dbErrorHandler");
-
-//app engloba todas las funciones de express
-
+// Start express app
 const app = express();
+
+app.enable("trust proxy");
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-//GLOBAL Middlewares
+// 1) GLOBAL MIDDLEWARES
+// Implement CORS
+app.use(cors());
+// Access-Control-Allow-Origin *
+// api.natours.com, front-end natours.com
+// app.use(cors({
+//   origin: 'https://www.natours.com'
+// }))
+
+app.options("*", cors());
+// app.options('/api/v1/tours/:id', cors());
 
 // Serving static files
 app.use(express.static(path.join(__dirname, "public")));
 
-//Set Security HTTP headers
+// Set security HTTP headers
 app.use(helmet());
 
-//Development logging
-
+// Development logging
 if (process.env.NODE_ENV === "development") {
 	app.use(morgan("dev"));
 }
 
-//Limit request
+// Limit requests from same API
 const limiter = rateLimit({
 	max: 100,
 	windowMs: 60 * 60 * 1000,
-	message: "Too many request from this IP,please true again in an hour",
+	message: "Too many requests from this IP, please try again in an hour!",
 });
-
 app.use("/api", limiter);
 
-//Body parser, reading data from body into req.body
+// Stripe webhook, BEFORE body-parser, because stripe needs the body as stream
 
-app.use(
-	express.json({
-		limit: "10kb",
-	})
-);
+// Body parser, reading data from body into req.body
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
 
-//Data sanitization against NoSql query injection
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
-app.use(mongoSanitaze());
-
-//Data sanitization against XSS
-
+// Data sanitization against XSS
 app.use(xss());
 
-//Prevent parameter pullution
-
+// Prevent parameter pollution
 app.use(
 	hpp({
 		whitelist: [
@@ -89,27 +86,22 @@ app.use(
 	})
 );
 
-/*app.use(cookieParser());
-app.use(expressValidator());*/
-app.use(cors());
+//app.use(compression());
 
-//Test middleware
-
+// Test middleware
 app.use((req, res, next) => {
 	req.requestTime = new Date().toISOString();
-	//console.log(req.headers);
+	// console.log(req.cookies);
 	next();
 });
 
-// 3) Routes
+// 3) ROUTES
 
-
-app.use("/", vsiewRoutes);
-
+app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/reviews", reviewRoutes);
-app.use(globalErrorHandler);
+app.use("/api/v1/reviews", reviewRouter);
+//app.use("/api/v1/bookings", bookingRouter);
 
 app.all("*", (req, res, next) => {
 	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
