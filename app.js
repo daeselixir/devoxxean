@@ -15,6 +15,7 @@ const AppError = require("./helpers/appError");
 const userRouter = require("./routes/userRoutes");
 const tourRouter = require("./routes/tourRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const viewRoutes = require("./routes/viewRoutes");
 
 //Body parser nos sirve para manejar todo el cuerpo de la request y la respuesta y como se
 //van a devolver esos datos
@@ -23,10 +24,8 @@ dotenv.config({
 	path: "./.env",
 });
 
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+
 const cors = require("cors");
-const expressValidator = require("express-validator");
 const globalErrorHandler = require("./helpers/dbErrorHandler");
 
 //app engloba todas las funciones de express
@@ -104,12 +103,8 @@ app.use((req, res, next) => {
 
 // 3) Routes
 
-app.get("/", (req, res) => {
-	res.status(200).render("base", {
-		tour: "The firest Hiker",
-		user: "Francisco",
-	});
-});
+
+app.use("/", vsiewRoutes);
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
