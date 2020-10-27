@@ -69,11 +69,6 @@ const tourSchema = new mongoose.Schema(
 			required: [true, "A tour must have a cover image"],
 		},
 		images: [String],
-		createdAt: {
-			type: Date,
-			default: Date.now(),
-			select: false,
-		},
 		startDates: [Date],
 		secretTour: {
 			type: Boolean,
@@ -111,6 +106,7 @@ const tourSchema = new mongoose.Schema(
 		],
 		//	reviews: [{ type: mongoose.Schema.ObjectId, ref: "Review" }],
 	},
+	{ timestamps: true },
 	{
 		toJSON: { virtuals: true },
 		toObject: { virtuals: true },
