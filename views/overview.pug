@@ -9,7 +9,7 @@ block content
           .card__header
             .card__picture
               .card__picture-overlay &nbsp;
-              img.card__picture-img(src=`img/tours/${tour.imageCover}`, alt=`${tour.name}`)
+              img.card__picture-img(src=`/img/tours/${tour.imageCover}`, alt=`${tour.name}`)
             h3.heading-tertirary
               span= tour.name
 
@@ -19,26 +19,28 @@ block content
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-map-pin')
-              span=tour.startLocation.description
+              span= tour.startLocation.description
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-calendar')
-              span=moment(tour.startDates[0]).format('MMMM Do YY')
+              //#{moment.locale('es')}  
+              span= moment(tour.startDates[0]).format('MMMM Do YY')
               //span=moment(tour.createdAt).format('LLL')
 
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-flag')
-              span=`${tour.locations.length} stops`
+              span= `${tour.locations.length} stops`
             .card__data
               svg.card__icon
                 use(xlink:href='/img/icons.svg#icon-user')
-              span=`${tour.maxGroupSize} people`
+              span= `${tour.maxGroupSize} people`
 
           .card__footer
             p
               span.card__footer-value= `$${tour.price}`
               span.card__footer-text  person
+
             p.card__ratings
               span.card__footer-value= tour.ratingAverage
               span.card__footer-text= `rating (${tour.ratingsQuantity})`
