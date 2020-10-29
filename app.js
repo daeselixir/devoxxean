@@ -44,17 +44,69 @@ app.options("*", cors());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Set security HTTP headers
+
+//LLER MAS SOBRE ESTO
 app.use(helmet());
-/*
+
 app.use(
 	helmet.contentSecurityPolicy({
 		directives: {
-			defaultSrc: ["'self'", "https:", "http:", "data:", "ws:"],
+			defaultSrc: ["'self'", "data:", "blob:"],
+
 			baseUri: ["'self'"],
-			fontSrc: ["'self'", "https:", "http:", "data:"],
-			scriptSrc: ["'self'", "https:", "http:", "blob:"],
-			styleSrc: ["'self'", "https:", "http:", "unsafe-inline"],
+
+			fontSrc: ["'self'", "https:", "data:"],
+
+			scriptSrc: ["'self'", "https://*.cloudflare.com"],
+
+			scriptSrc: ["'self'", "https://*.stripe.com"],
+
+			scriptSrc: ["'self'", "http:", "https://*.mapbox.com", "data:"],
+
+			frameSrc: ["'self'", "https://*.stripe.com"],
+
+			objectSrc: ["'none'"],
+
+			styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+
+			workerSrc: ["'self'", "data:", "blob:"],
+
+			childSrc: ["'self'", "blob:"],
+
+			imgSrc: ["'self'", "data:", "blob:"],
+
+			connectSrc: ["'self'", "blob:", "https://*.mapbox.com"],
+
+			upgradeInsecureRequests: [],
 		},
+	})
+);
+/*
+"Content-Security-Policy",
+			"default-src 'self' https://*.mapbox.com https://*.stripe.com 
+			;base-uri 'self';
+			block-all-mixed-content;
+			font-src 'self' https: data:;
+			frame-ancestors 'self';img-src 'self' data:;
+			object-src 'none';
+			script-src https://*.cloudflare.com https://*.mapbox.com https://*.stripe.com 'self' blob: ;
+			script-src-attr: 'none';
+			style-src 'self' https: 'unsafe-inline';
+		
+		/*	upgrade-insecure-requests;"*/
+/*
+app.use(
+	helmet.contentSecurityPolicy({
+
+		directives: {
+			defaultSrc: ['self', 'https://*.mapbox.com https://*.stripe.com https://*.cloudflare.com'],
+			baseUri: ['self'],
+			fontSrc: ['self', 'https:','http:', 'data:'],
+			scriptSrc: ['self','https://*.mapbox.com https://*.stripe.com https://*.cloudflare.com'],
+			scriptSrcAttr:['none'],
+			styleSrc: ['self', 'https:', 'http:','unsafe-inline']
+			
+		}
 	})
 );
 */
@@ -103,7 +155,7 @@ app.use(
 // Test middleware
 app.use((req, res, next) => {
 	req.requestTime = new Date().toISOString();
-	// console.log(req.cookies);
+	//console.log(req.cookies);
 
 	next();
 });
