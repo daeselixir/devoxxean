@@ -14,16 +14,20 @@ exports.getOverview = catchAsync(async (req, res) => {
 	//2- Build template
 
 	//3- Render that template using tour data from 1-
-	res.status(200)
-	/*.set(
+	res
+		.status(200)
+		/*.set(
 			"Content-Security-Policy",
 			"default-src 'self' https://*.mapbox.com https://*.stripe.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://*.cloudflare.com https://*.mapbox.com https://*.stripe.com 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
-		)*/.render("overview", {
-		title: "All tours",
-		tours,
-		esp,
-		moment,
-	});
+		)*/ .render(
+			"overview",
+			{
+				title: "All tours",
+				tours,
+				esp,
+				moment,
+			}
+		);
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
@@ -54,8 +58,6 @@ exports.getTour = catchAsync(async (req, res, next) => {
 		});
 });
 
-
-
 exports.getLoginForm = (req, res) => {
 	res.status(200).render("login", {
 		title: "Log into your account",
@@ -63,8 +65,26 @@ exports.getLoginForm = (req, res) => {
 };
 
 exports.getAccount = (req, res) => {
-  res.status(200).render('account', {
-    title: 'Your account'
-  });
+	res.status(200).render("account", {
+		title: "Your account",
+	});
 };
 
+exports.updateUserData = catchAsync(async (req, res, next) => {
+	//console.log(req.body);
+	const updatedUser = await User.findByIdAndUpdate(
+		req.user.id,
+		{
+			name: req.body.name,
+			email: req.body.email,
+		},
+		{
+			new: true,
+			runValidators: true,
+		}
+	);
+	res.status(200).render("account", {
+		title: "Your account",
+		user: updatedUser,
+	});
+});
