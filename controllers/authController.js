@@ -19,7 +19,7 @@ const createSendToken = (user, statusCode, req, res) => {
 			Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
 		),
 		httpOnly: true,
-		secure: req.secure || req.headers["x-forwarded-proto"] === "https",
+		secure: req.secure || req.get["x-forwarded-proto"] === "https",
 	};
 	if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
@@ -67,7 +67,7 @@ exports.login = catchAsync(async (req, res, next) => {
 	}
 
 	// 3) If everything ok, send token to client
-	createSendToken(user, 200, res);
+	createSendToken(user, 200, req, res);
 });
 
 exports.logout = (req, res) => {
@@ -182,7 +182,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	await user.save({ validateBeforeSave: false });
 
 	// 3) Send it to user's email
-
 	try {
 		const resetURL = `${req.protocol}://${req.get(
 			"host"
